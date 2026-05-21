@@ -1,0 +1,3 @@
+22:43:39 [INFO] src.models.alarm_manager: No alarms file found — starting with an empty list.
+22:43:40 [INFO] src.app: Theme loaded from C:\Users\User\AppData\Local\Temp\_MEI132202\src\resources\styles/theme.qss
+22:43:40 [INFO] src.app: Application started.

@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+dist/
+build/
+*.spec
+*.exe
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Temporary files
+*.tmp
+.tmp/
+
+# Testing
+.pytest_cache/
+tests/__pycache__/
+
+# Project memory
+.opencode/
+
+# Alarm test data
+alarms.json
