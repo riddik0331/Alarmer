@@ -27,7 +27,7 @@ class TestAlarmCreation:
         assert alarm.days == []
         assert alarm.once is True
         assert alarm.sound_source == "builtin"
-        assert alarm.sound_name == "classic"
+        assert alarm.sound_name == "alarm_1"
         assert alarm.sound_file is None
         assert alarm.volume == 80
         assert alarm.fade_in is False
@@ -114,7 +114,7 @@ class TestSerialization:
         assert alarm.days == []
         assert alarm.once is True
         assert alarm.sound_source == "builtin"
-        assert alarm.sound_name == "classic"
+        assert alarm.sound_name == "alarm_1"
         assert alarm.sound_file is None
         assert alarm.volume == 80
         assert alarm.fade_in is False

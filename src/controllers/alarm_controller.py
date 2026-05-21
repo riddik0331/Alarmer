@@ -94,6 +94,8 @@ class AlarmController(QObject):
 
         dialog = AlarmFormDialog(self._main_window)
         dialog.saved.connect(self._on_alarm_saved)
+        dialog.preview_requested.connect(self._sound_manager.preview_sound)
+        dialog.preview_stop_requested.connect(self._sound_manager.stop_preview)
         dialog.open()
 
     def _on_edit_alarm(self, alarm_id: str) -> None:
@@ -117,6 +119,8 @@ class AlarmController(QObject):
         dialog = AlarmFormDialog(self._main_window)
         dialog.set_alarm(alarm)
         dialog.saved.connect(self._on_alarm_saved)
+        dialog.preview_requested.connect(self._sound_manager.preview_sound)
+        dialog.preview_stop_requested.connect(self._sound_manager.stop_preview)
         dialog.open()
 
     def _on_delete_alarm(self, alarm_id: str) -> None:

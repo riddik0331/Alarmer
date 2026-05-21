@@ -208,6 +208,7 @@ class SoundManager(QObject):
         sounds_dir = Storage.get_sounds_dir()
         # Map the key to an actual file name
         file_map = {
+            "alarm_1": "alarm_1.wav",
             "classic": "classic.wav",
             "gentle": "gentle.wav",
             "nature": "nature.wav",

@@ -31,6 +31,7 @@ PULSE_COLOR_END: str = "#2d004d"
 # Built-in sounds
 # ---------------------------------------------------------------------------
 BUILTIN_SOUNDS: dict[str, str] = {
+    "alarm_1": "Основной",
     "classic": "Классический",
     "gentle": "Нежный",
     "nature": "Природа",

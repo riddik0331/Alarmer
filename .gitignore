@@ -44,3 +44,15 @@ tests/__pycache__/
 
 # Alarm test data
 alarms.json
+
+# Temp files from testing
+stderr.txt
+stdout.txt.coverage.coverage.*
+*.wav
+Readme.txt
+
+# Temp files
+stderr.txt
+stdout.txt.coverage.coverage.*
+*.wav
+Readme.txt

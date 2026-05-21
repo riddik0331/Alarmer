@@ -40,7 +40,7 @@ class Alarm:
     days: list[int] = field(default_factory=list)
     once: bool = True
     sound_source: str = "builtin"
-    sound_name: str = "classic"
+    sound_name: str = "alarm_1"
     sound_file: Optional[str] = None
     volume: int = 80
     fade_in: bool = False
@@ -81,7 +81,7 @@ class Alarm:
             days=list(data.get("days", [])),
             once=bool(data.get("once", True)),
             sound_source=str(data.get("sound_source", "builtin")),
-            sound_name=str(data.get("sound_name", "classic")),
+            sound_name=str(data.get("sound_name", "alarm_1")),
             sound_file=data.get("sound_file"),  # keep None
             volume=int(data.get("volume", 80)),
             fade_in=bool(data.get("fade_in", False)),

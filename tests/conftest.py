@@ -69,6 +69,7 @@ def alarm_with_file_sound() -> Alarm:
         time="12:00",
         once=True,
         sound_source="file",
+        sound_name="classic",
         sound_file="C:\\nonexistent\\sound.wav",
     )
 
