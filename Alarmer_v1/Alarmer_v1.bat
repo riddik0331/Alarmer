@@ -1,4 +1,4 @@
 @echo off
-title Alarmer_v1
+cd /d "%~dp0"
 start /b pythonw src\main.py
 exit

@@ -25,9 +25,6 @@ class Alarm:
         days:          ISO weekday numbers 1=Monday … 7=Sunday.
                        Empty list means ``once`` mode.
         once:          ``True`` = one-shot alarm (ignores *days*).
-        sound_source:  ``"builtin"`` or ``"file"``.
-        sound_name:    Key into ``BUILTIN_SOUNDS`` (used when *sound_source* is ``"builtin"``).
-        sound_file:    Absolute path to a user-supplied sound file, or ``None``.
         volume:        Volume level 0–100.
         fade_in:       ``True`` = gradually increase volume over 30 s.
         snoozed_until: "HH:MM" string when snoozed, or ``None``.
@@ -39,9 +36,6 @@ class Alarm:
     time: str = "08:00"
     days: list[int] = field(default_factory=list)
     once: bool = True
-    sound_source: str = "builtin"
-    sound_name: str = "classic"
-    sound_file: Optional[str] = None
     volume: int = 80
     fade_in: bool = False
     snoozed_until: Optional[str] = None
@@ -59,9 +53,6 @@ class Alarm:
             "time": self.time,
             "days": list(self.days),
             "once": self.once,
-            "sound_source": self.sound_source,
-            "sound_name": self.sound_name,
-            "sound_file": self.sound_file,
             "volume": self.volume,
             "fade_in": self.fade_in,
             "snoozed_until": self.snoozed_until,
@@ -80,9 +71,6 @@ class Alarm:
             time=str(data.get("time", "08:00")),
             days=list(data.get("days", [])),
             once=bool(data.get("once", True)),
-            sound_source=str(data.get("sound_source", "builtin")),
-            sound_name=str(data.get("sound_name", "classic")),
-            sound_file=data.get("sound_file"),  # keep None
             volume=int(data.get("volume", 80)),
             fade_in=bool(data.get("fade_in", False)),
             snoozed_until=data.get("snoozed_until"),  # keep None
@@ -148,4 +136,3 @@ class Alarm:
         if not isinstance(other, Alarm):
             return NotImplemented
         return self.time < other.time
-

@@ -1,7 +1,7 @@
-"""SoundManager — audio playback, built-in / file-based sounds, volume
-control, and fade-in support.
+"""SoundManager — audio playback, volume control, and fade-in support.
 
-Uses ``QMediaPlayer`` + ``QAudioOutput`` for cross-format playback (MP3 / WAV).
+Always plays the built-in ``alarm_1.wav`` sound file.
+Uses ``QMediaPlayer`` + ``QAudioOutput`` for cross-format playback.
 """
 
 from __future__ import annotations
@@ -14,14 +14,19 @@ from PySide6.QtCore import QObject, QTimer, Signal, QUrl
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 
 from src.models.alarm_model import Alarm
-from src.utils.constants import BUILTIN_SOUNDS, FADE_INTERVAL_MS, FADE_IN_DURATION
+from src.utils.constants import FADE_INTERVAL_MS, FADE_IN_DURATION
 from src.utils.storage import Storage
 
 logger = logging.getLogger(__name__)
 
+SOUND_FILE = "alarm_1.wav"
+
 
 class SoundManager(QObject):
-    """Manages playback of alarm sounds: play, stop, preview, fade-in.
+    """Manages playback of alarm sounds: play, stop, fade-in.
+
+    Always plays the built-in ``alarm_1.wav``.  Volume and fade-in settings
+    are read from the ``Alarm`` instance; the sound file itself is fixed.
 
     Signals:
         sound_started: Emitted when a new sound begins playing.
@@ -60,17 +65,20 @@ class SoundManager(QObject):
     # ------------------------------------------------------------------
 
     def play(self, alarm: Alarm) -> None:
-        """Start playing the sound configured in *alarm*.
+        """Start playing the built-in alarm sound.
 
         If the alarm has ``fade_in`` enabled, a fade-in sequence is started;
         otherwise the volume jumps directly to the user's setting.
+
+        Args:
+            alarm: The alarm whose volume/fade-in settings to use.
         """
         self.stop()
         self._current_alarm = alarm
 
-        source_path = self._resolve_source_path(alarm)
+        source_path = self._get_sound_path()
         if not source_path:
-            logger.error("No playable sound source for alarm %s", alarm.id)
+            logger.error("Alarm sound file missing: alarm_1.wav")
             return
 
         self._player.setSource(QUrl.fromLocalFile(source_path))
@@ -92,71 +100,6 @@ class SoundManager(QObject):
         self._player.stop()
         self._current_alarm = None
         self.sound_stopped.emit()
-
-    def preview_sound(self, sound_name: str) -> None:
-        """Play a built-in sound once (non-looping) for preview purposes.
-
-        The volume is set to 50 % to avoid startling the user.
-        """
-        self.stop_preview()
-        path = self._get_sound_path(sound_name)
-        if not path:
-            logger.warning("Preview sound not found: %s", sound_name)
-            return
-
-        self._player.setSource(QUrl.fromLocalFile(path))
-        self._player.setLoops(QMediaPlayer.Once)
-        self._set_volume(0.5)
-        self._player.play()
-        self.sound_started.emit()
-
-    def stop_preview(self) -> None:
-        """Stop any ongoing preview playback."""
-        self._fade_timer.stop()
-        self._player.stop()
-        self.sound_stopped.emit()
-
-    # ------------------------------------------------------------------
-    # Compatibility public methods (used by existing controllers)
-    # ------------------------------------------------------------------
-
-    def play_builtin(self, sound_name: str, volume: int) -> None:
-        """Play a built-in sound at the specified volume (compatibility wrapper).
-
-        Args:
-            sound_name: Key into ``BUILTIN_SOUNDS`` (e.g. ``"classic"``).
-            volume:     Volume level 0–100.
-        """
-        path = self._get_sound_path(sound_name)
-        if not path:
-            logger.warning("Built-in sound not found: %s", sound_name)
-            return
-        self._player.setSource(QUrl.fromLocalFile(path))
-        self._player.setLoops(QMediaPlayer.Infinite)
-        self._set_volume(volume / 100.0)
-        self._player.play()
-        self.sound_started.emit()
-
-    def play_file(self, file_path: str, volume: int) -> None:
-        """Play a user-supplied sound file at the specified volume.
-
-        Args:
-            file_path: Absolute path to a sound file.
-            volume:    Volume level 0–100.
-        """
-        self._player.setSource(QUrl.fromLocalFile(file_path))
-        self._player.setLoops(QMediaPlayer.Infinite)
-        self._set_volume(volume / 100.0)
-        self._player.play()
-        self.sound_started.emit()
-
-    def start_fade(self, target_volume: int) -> None:
-        """Start a fade-in sequence toward *target_volume* over 30 seconds.
-
-        Args:
-            target_volume: Target volume level 0–100.
-        """
-        self._start_fade_in(target_volume / 100.0)
 
     # ------------------------------------------------------------------
     # Volume
@@ -189,33 +132,10 @@ class SoundManager(QObject):
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _resolve_source_path(self, alarm: Alarm) -> Optional[str]:
-        """Return the absolute path to the sound file for *alarm*."""
-        if alarm.sound_source == "file" and alarm.sound_file:
-            if os.path.isfile(alarm.sound_file):
-                return alarm.sound_file
-            logger.warning("User sound file missing: %s", alarm.sound_file)
-            # Fall through to built-in
-
-        return self._get_sound_path(alarm.sound_name)
-
-    def _get_sound_path(self, sound_name: str) -> Optional[str]:
-        """Return the full path of a built-in sound file, or ``None``."""
-        if sound_name not in BUILTIN_SOUNDS:
-            logger.warning("Unknown built-in sound: %s", sound_name)
-            return None
-
+    def _get_sound_path(self) -> Optional[str]:
+        """Return the full path of the built-in alarm sound, or ``None``."""
         sounds_dir = Storage.get_sounds_dir()
-        # Map the key to an actual file name
-        file_map = {
-            "classic": "classic.wav",
-            "gentle": "gentle.wav",
-            "nature": "nature.wav",
-            "energetic": "energetic.wav",
-            "lounge": "lounge.wav",
-        }
-        filename = file_map.get(sound_name, f"{sound_name}.wav")
-        path = os.path.join(sounds_dir, filename)
+        path = os.path.join(sounds_dir, SOUND_FILE)
         if not os.path.isfile(path):
             logger.warning("Sound file not found on disk: %s", path)
             return None
@@ -225,4 +145,3 @@ class SoundManager(QObject):
         """Restart playback when the media ends (infinite loop via status)."""
         if status == QMediaPlayer.MediaStatus.EndOfMedia and self._current_alarm is not None:
             self._player.play()
-
