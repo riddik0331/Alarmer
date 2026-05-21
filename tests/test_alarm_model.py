@@ -26,9 +26,6 @@ class TestAlarmCreation:
         assert alarm.time == "08:00"
         assert alarm.days == []
         assert alarm.once is True
-        assert alarm.sound_source == "builtin"
-        assert alarm.sound_name == "alarm_1"
-        assert alarm.sound_file is None
         assert alarm.volume == 80
         assert alarm.fade_in is False
         assert alarm.snoozed_until is None
@@ -72,7 +69,6 @@ class TestSerialization:
         assert d["time"] == "07:30"
         assert d["days"] == [1, 2, 3, 4, 5]
         assert d["once"] is False
-        assert d["sound_source"] == "builtin"
         assert d["volume"] == 80
 
     def test_from_dict_full(self) -> None:
@@ -84,9 +80,6 @@ class TestSerialization:
             "time": "22:15",
             "days": [6, 7],
             "once": False,
-            "sound_source": "file",
-            "sound_name": "gentle",
-            "sound_file": "C:\\music\\alarm.wav",
             "volume": 50,
             "fade_in": True,
             "snoozed_until": "22:20",
@@ -98,9 +91,6 @@ class TestSerialization:
         assert alarm.time == "22:15"
         assert alarm.days == [6, 7]
         assert alarm.once is False
-        assert alarm.sound_source == "file"
-        assert alarm.sound_name == "gentle"
-        assert alarm.sound_file == "C:\\music\\alarm.wav"
         assert alarm.volume == 50
         assert alarm.fade_in is True
         assert alarm.snoozed_until == "22:20"
@@ -113,9 +103,6 @@ class TestSerialization:
         assert alarm.title == ""
         assert alarm.days == []
         assert alarm.once is True
-        assert alarm.sound_source == "builtin"
-        assert alarm.sound_name == "alarm_1"
-        assert alarm.sound_file is None
         assert alarm.volume == 80
         assert alarm.fade_in is False
         assert alarm.snoozed_until is None
@@ -140,12 +127,11 @@ class TestSerialization:
                 f"Field '{field}' differs after roundtrip"
             )
 
-    def test_roundtrip_with_none_file(self) -> None:
-        """``sound_file`` and ``snoozed_until`` remain None after roundtrip."""
+    def test_roundtrip_with_none_fields(self) -> None:
+        """``snoozed_until`` remains None after roundtrip."""
         alarm = Alarm(id="none-test", time="14:00")
         d = alarm.to_dict()
         restored = Alarm.from_dict(d)
-        assert restored.sound_file is None
         assert restored.snoozed_until is None
 
     def test_days_are_copied_in_to_dict(self) -> None:
@@ -154,6 +140,23 @@ class TestSerialization:
         d = alarm.to_dict()
         d["days"].append(4)
         assert alarm.days == [1, 2, 3]
+
+    def test_from_dict_ignores_old_sound_fields(self) -> None:
+        """Old alarms with sound_source/sound_name/sound_file should still load."""
+        data = {
+            "id": "legacy",
+            "time": "07:00",
+            "sound_source": "file",
+            "sound_name": "classic",
+            "sound_file": "C:\\old.wav",
+        }
+        alarm = Alarm.from_dict(data)
+        assert alarm.id == "legacy"
+        assert alarm.time == "07:00"
+        # sound fields are simply ignored — no crash
+        assert not hasattr(alarm, "sound_source")
+        assert not hasattr(alarm, "sound_name")
+        assert not hasattr(alarm, "sound_file")
 
 
 # ===================================================================

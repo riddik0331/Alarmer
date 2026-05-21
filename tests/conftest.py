@@ -25,9 +25,6 @@ def sample_alarm() -> Alarm:
         time="07:30",
         days=[1, 2, 3, 4, 5],  # Mon-Fri
         once=False,
-        sound_source="builtin",
-        sound_name="classic",
-        sound_file=None,
         volume=80,
         fade_in=False,
         snoozed_until=None,
@@ -56,21 +53,6 @@ def disabled_alarm() -> Alarm:
         title="Disabled",
         time="06:00",
         once=True,
-    )
-
-
-@pytest.fixture
-def alarm_with_file_sound() -> Alarm:
-    """Alarm configured to play a user-supplied file."""
-    return Alarm(
-        id="file-sound-id",
-        enabled=True,
-        title="File Sound",
-        time="12:00",
-        once=True,
-        sound_source="file",
-        sound_name="classic",
-        sound_file="C:\\nonexistent\\sound.wav",
     )
 
 

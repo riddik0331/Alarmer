@@ -94,8 +94,6 @@ class AlarmController(QObject):
 
         dialog = AlarmFormDialog(self._main_window)
         dialog.saved.connect(self._on_alarm_saved)
-        dialog.preview_requested.connect(self._sound_manager.preview_sound)
-        dialog.preview_stop_requested.connect(self._sound_manager.stop_preview)
         dialog.open()
 
     def _on_edit_alarm(self, alarm_id: str) -> None:
@@ -119,8 +117,6 @@ class AlarmController(QObject):
         dialog = AlarmFormDialog(self._main_window)
         dialog.set_alarm(alarm)
         dialog.saved.connect(self._on_alarm_saved)
-        dialog.preview_requested.connect(self._sound_manager.preview_sound)
-        dialog.preview_stop_requested.connect(self._sound_manager.stop_preview)
         dialog.open()
 
     def _on_delete_alarm(self, alarm_id: str) -> None:
@@ -199,15 +195,8 @@ class AlarmController(QObject):
             logger.warning("Cannot show popup: main_window is None")
             return
 
-        # Play appropriate sound
-        if alarm.sound_source == "file" and alarm.sound_file:
-            self._sound_manager.play_file(alarm.sound_file, alarm.volume)
-        else:
-            self._sound_manager.play_builtin(alarm.sound_name, alarm.volume)
-
-        # Start fade-in if enabled
-        if alarm.fade_in:
-            self._sound_manager.start_fade(alarm.volume)
+        # Play the built-in sound (volume/fade-in are handled inside SoundManager)
+        self._sound_manager.play(alarm)
 
         # Create and show the popup window
         from PySide6.QtCore import Qt  # noqa: PLC0415

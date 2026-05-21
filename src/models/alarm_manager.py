@@ -284,7 +284,7 @@ class AlarmManager(QObject):
     @staticmethod
     def _validate_alarm_dict(data: dict) -> bool:
         """Basic sanity check for a deserialised alarm dictionary."""
-        required = {"id", "enabled", "time", "days", "once", "sound_source", "volume", "fade_in"}
+        required = {"id", "enabled", "time", "days", "once", "volume", "fade_in"}
         if not required.issubset(data.keys()):
             return False
         time_val = data.get("time", "")
